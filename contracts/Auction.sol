@@ -2,7 +2,6 @@
 pragma solidity ^0.8.9;
 
 // import "hardhat/console.sol";
-// import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 // ownable openzeppelin
 // import "@openzeppelin/contracts/access/Ownable.sol";
 
@@ -10,7 +9,6 @@ pragma solidity ^0.8.9;
 @todo install openzeppelin
 @todo use openzeppelin's ownable
 @todo create frontend if time permits
-@note who receives the bid amount? the auctioneer or the contract itself?
 @todo update the contract: see requirements
 @todo run slither
 */
@@ -21,6 +19,8 @@ contract Auction {
 
     struct Auctions {
         uint auctionId;
+        string auctionName; // @todo make things quirky, AuctionName: Southeby's Auction of the Century
+        // AuctionName: Worst Mistake of Your Life
         Item item;
         uint256 highestBid;
         address payable highestBidder; // @note is payable necessary? yes it is because we need to transfer money to the previous highest bidder
