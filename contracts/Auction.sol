@@ -91,19 +91,13 @@ contract Auction {
         );
         require(msg.sender != owner, "Owner cannott bid on their own auction."); // @todo use custom error to save gas
 
-        // if the above conditions are met then ...
+        // if the above conditions are met then we want to transger the previous highest bidder their money
         address prevHighestBidder = auctions[auctionId].highestBidder;
         uint256 prevHighestBid = auctions[auctionId].highestBid;
 
         auctions[auctionId].highestBid = msg.value;
         auctions[auctionId].highestBidder = payable(msg.sender);
-
-        transferToOldBidder(payable(prevHighestBidder), prevHighestBid);
-
-        // !this won't work because the bidder can bid on multiple auctions (if I am using the Factory)
-        // !also how can I return the money using the mapping?
-        // bidders[msg.sender] = msg.value;
-
+        transferToPrevBidder(payable(prevHighestBidder), prevHighestBid);
         emit BidPlaced(auctionId, msg.value, msg.sender);
     }
 
@@ -124,7 +118,7 @@ contract Auction {
         emit AuctionEnded(_auctionId, highestBid, auctionWinner);
     }
 
-    function transferToOldBidder(
+    function transferToPrevBidder(
         address payable _prevBidder,
         uint prevHighestBid
     ) private {
