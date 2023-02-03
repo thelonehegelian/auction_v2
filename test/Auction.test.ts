@@ -10,12 +10,15 @@ import { Auction } from '../typechain-types/Auction';
 // @note also possible to use hardhat-deploy
 // @note be careful not to reuse variables
 // @todo update revert messages
+// @todo turn on ESLint
 
 // sample item for testing
 const Item: Auction.ItemStruct = {
   itemName: 'Movie Ticket',
   itemPrice: 100,
 };
+
+const BID_AMOUNT = ethers.utils.parseEther('125');
 
 // @note For ERC20 token we can either get tokens from whale address or do a storage hack
 
@@ -72,14 +75,38 @@ describe('Auction', function () {
     });
 
     it('Should allow bid greater than highest bid', async function () {
-      const { auction, bidder1 } = await loadFixture(deployAuctionFixture);
+      const { auction, bidder1, bidder2 } = await loadFixture(
+        deployAuctionFixture
+      );
+      const firstBidderOriginalBalance = await ethers.provider.getBalance(
+        bidder1.address
+      );
+
       await auction.createAuction(1, Item);
-      await auction.connect(bidder1).placeBid(1, { value: 101 });
+      await auction.connect(bidder1).placeBid(1, { value: BID_AMOUNT });
+
       const auctionItem = await auction.auctions(1);
+      // contract balance and highest bid should be equal now
+      const contractBalance = await ethers.provider.getBalance(auction.address);
+      expect(contractBalance).to.equal(auctionItem.highestBid); // !annoying big numbers!
       // highest bid should be updated
-      expect(auctionItem.highestBid).to.equal(101);
+      expect(auctionItem.highestBid).to.equal(BID_AMOUNT);
       // bidder should be updated
       expect(auctionItem.highestBidder).to.equal(bidder1.address);
+
+      await auction
+        .connect(bidder2)
+        .placeBid(1, { value: ethers.utils.parseEther('150') });
+      // bidder2 should be the highest bidder now and bidder1 should get their money back
+      const auctionItemAfter = await auction.auctions(1);
+      expect(auctionItemAfter.highestBidder).to.equal(bidder2.address);
+      const firstBidderBalanceAfter = await ethers.provider.getBalance(
+        bidder1.address
+      );
+      expect(firstBidderOriginalBalance).to.closeTo(
+        firstBidderBalanceAfter,
+        1000000000000000000n // @note bad practice
+      );
     });
 
     it('Should not allow bid after auction end time', async function () {
