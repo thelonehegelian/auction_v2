@@ -20,6 +20,7 @@
 
 ### Objects
 - AuctionDetails
+  - Why `auctionId` and `auctionName`? I had planned to add a Factory contract to make it more interesting
 - Item
 
 ### Functions
@@ -66,6 +67,6 @@
 - Liked to have used an Oracle to set prices in USD or even a sort of NFT barter system
 - Would be nice to use NFTs  for each item 
 - For better user experience gas cost can probably reduced more, using bytes instead of strings etc.
-- A basic frontend would have been nice and simple to implement for this
 - Sell certain quantity of items, with each piece sold the price of the item increases by a percentage
 - Allow bidders to set a maximum bid as well i.e. how high they are willing to go. Would save them gas cost of trying to constantly outbid
+- A basic frontend would have been nice and simple to implement for this
