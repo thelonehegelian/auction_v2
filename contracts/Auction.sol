@@ -68,7 +68,13 @@ contract Auction {
     }
 
     // * this function adds balance to the contract
-    function placeBids(uint auctionId) public payable {
+    function placeBid(uint auctionId) public payable {
+        // require that auctionEndTime is not yet reached
+        require(
+            auctions[auctionId].auctionEndTime > block.timestamp,
+            "Auction has ended."
+        );
+
         require(
             msg.value > auctions[auctionId].highestBid,
             "Your bid is lower than the highest bid." // @todo use custom error to save gas
@@ -77,7 +83,7 @@ contract Auction {
             block.timestamp < auctions[auctionId].auctionEndTime,
             "Auction has ended." // @todo use custom error to save gas
         );
-        require(msg.sender != owner, "Owner can't bid on their own auction."); // @todo use custom error to save gas
+        require(msg.sender != owner, "Owner cannott bid on their own auction."); // @todo use custom error to save gas
 
         auctions[auctionId].highestBid = msg.value;
         auctions[auctionId].highestBidder = msg.sender;
