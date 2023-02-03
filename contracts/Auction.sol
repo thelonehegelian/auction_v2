@@ -8,11 +8,12 @@ pragma solidity ^0.8.9;
 
 /* 
 @todo install openzeppelin
-@todo create a factory contract
+@todo use openzeppelin's ownable
 @todo create frontend if time permits
-
+@note who receives the bid amount? the auctioneer or the contract itself?
 
 */
+
 contract Auction {
     // state variables
     address public owner;
@@ -52,23 +53,31 @@ contract Auction {
      *  MAIN *
      *********/
 
-    // !is this even gonna work?
+    // !is this even gonna work? probably not yet
+    // @todo auctioneer must put ERC20 token
     function createAuction(uint auctionId, Item memory item) public onlyOwner {
         Auctions storage _auctions = auctions[auctionId++];
         _auctions.auctionId = auctionId;
         _auctions.item = item;
-        _auctions.highestBid = 0; // not necessary, solidity does this by default
+        // @note could be a mapping?
+        _auctions.highestBid = item.itemPrice; // starting price, this way we won't have to check if the bid is higher than the starting price
         _auctions.highestBidder = address(0); // not necessary, solidity does this by default
         _auctions.auctionEndTime = block.timestamp + 1 days;
 
         emit AuctionCreated(auctionId, item);
     }
 
+    // * this function adds balance to the contract
     function placeBids(uint auctionId) public payable {
         require(
             msg.value > auctions[auctionId].highestBid,
             "Your bid is lower than the highest bid." // @todo use custom error to save gas
         );
+        require(
+            block.timestamp < auctions[auctionId].auctionEndTime,
+            "Auction has ended." // @todo use custom error to save gas
+        );
+        require(msg.sender != owner, "Owner can't bid on their own auction."); // @todo use custom error to save gas
 
         auctions[auctionId].highestBid = msg.value;
         auctions[auctionId].highestBidder = msg.sender;
@@ -91,5 +100,6 @@ contract Auction {
         // has the auction ended?
         // is the highest bid higher than the item price?
         // is the highest bid higher than the highest bid?
+        // return money to all the bidders except the highest bidder
     }
 }
