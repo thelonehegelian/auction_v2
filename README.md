@@ -70,3 +70,4 @@
 - Sell certain quantity of items, with each piece sold the price of the item increases by a percentage
 - Allow bidders to set a maximum bid as well i.e. how high they are willing to go. Would save them gas cost of trying to constantly outbid
 - A basic frontend would have been nice and simple to implement for this
+- Maybe some prevention against sniping bots(?)
