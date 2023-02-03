@@ -28,7 +28,11 @@ contract Auction {
     }
     struct Item {
         string itemName;
-        uint256 itemPrice; // starting price
+        uint256 itemPrice; // starting price @todo change name to startingPrice
+        // @todo highestBid
+        // @todo highestBidder
+
+        // @todo add sold bool
         // address highestBidder; @todo uncomment this and update the code
     }
 
@@ -43,6 +47,7 @@ contract Auction {
      *  EVENTS *
      ***********/
 
+    // @todo should be indexed
     event AuctionCreated(uint auctionId, Item item);
     event BidPlaced(uint auctionId, uint256 highestBid, address highestBidder);
     event AuctionEnded(
@@ -112,6 +117,9 @@ contract Auction {
      ************/
 
     function findHighestBidder(uint _auctionId) private {
+        // @todo loop through all the items in the auction and find the highest bidders
+        // return the array of highest bidders for each item
+
         address auctionWinner = auctions[_auctionId].highestBidder;
         uint256 highestBid = auctions[_auctionId].highestBid;
         // @todo find the highest bidder for each item
