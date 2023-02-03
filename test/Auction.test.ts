@@ -18,6 +18,12 @@ const Item: Auction.ItemStruct = {
   itemPrice: 100,
 };
 
+const Auction = {
+  auctionId: 0,
+  auctionName: 'Worst Mistakes of Your Life',
+  item: Item,
+};
+
 const BID_AMOUNT = ethers.utils.parseEther('125');
 
 // @note For ERC20 token we can either get tokens from whale address or do a storage hack
