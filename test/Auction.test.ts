@@ -88,6 +88,7 @@ describe('Auction', function () {
         .be.reverted;
     });
 
+    // @todo fix this
     it('Should allow bid greater than highest bid', async function () {
       const { auction, bidder1, bidder2 } = await loadFixture(
         deployAuctionFixture

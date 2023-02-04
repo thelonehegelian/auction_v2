@@ -57,6 +57,8 @@ contract Auction is Ownable {
         _createItemList(items);
         newAuction.auctionId = auctionId;
         newAuction.auctionName = auctionName;
+        // block.timestamp is not always suited, as it can be manipulated by miners but only a few seconds
+        // https://stackoverflow.com/questions/71000103/solidity-block-timestamp-vulnerability
         newAuction.auctionEndTime = block.timestamp + 1 days;
     }
 
