@@ -112,18 +112,17 @@ describe('Auction', function () {
       );
     });
 
-    // it('Should not allow bid after auction end time', async function () {
-    //   const { auction, bidder1 } = await loadFixture(deployAuctionFixture);
-    //   const now = await time.latest(); // @note do I need this?
-    //   const twoDays = 172800;
+    it('Should not allow bid after auction end time', async function () {
+      const { auction, bidder1 } = await loadFixture(deployAuctionFixture);
+      const now = await time.latest(); // @note do I need this?
+      const twoDays = 172800;
 
-    //   await auction.createAuction(1, Item);
+      await auction.createAuction(items, auctionName);
 
-    //   // increase time to two days after auction end time
-    //   await time.increase(now + twoDays);
-    //   await expect(
-    //     auction.connect(bidder1).placeBid(1, { value: 101 })
-    //   ).to.be.revertedWith('Auction has ended.');
-    // });
+      // increase time to two days after auction end time
+      await time.increase(now + twoDays);
+      await expect(auction.connect(bidder1).placeBid(0, 1, { value: 101 })).to
+        .be.reverted;
+    });
   });
 });

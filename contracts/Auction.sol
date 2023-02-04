@@ -76,6 +76,11 @@ contract Auction is Ownable {
             "Owner cannott bid on their own auction."
         ); // @todo use custom error to save gas
 
+        require(
+            block.timestamp < auctions[_auctionId].auctionEndTime,
+            "Auction has ended."
+        ); // @todo use custom error to save gas
+
         // if the above conditions are met then we want to transfer the previous highest bidder their money
         address prevHighestBidder = auctions[_auctionId]
             .items[_itemId]
