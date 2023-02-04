@@ -26,11 +26,6 @@ contract Auction is Ownable {
 
     uint auctionId = 0;
 
-    // mapping(address => uint) public bidders;
-    // !how about this: itemId => address of the highest bidder
-    // *have to loop through the items anyway, because we need to find the highest bidder for each item
-    mapping(uint => address) public itemHighestBidder;
-
     /***********
      *  EVENTS *
      ***********/
