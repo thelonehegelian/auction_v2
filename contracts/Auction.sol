@@ -5,12 +5,13 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract Auction is Ownable {
-    // state variables
-
+    /*********************
+     *  STATE VARIABLES  *
+     *********************/
     struct Auctions {
         uint auctionId;
         string auctionName; // AuctionName: Worst Mistake of Your Life
-        Item[] items;
+        Item[] items; // ItemName: "That bad yoghurt you ate just before exams"
         uint256 auctionEndTime;
     }
 
@@ -26,9 +27,9 @@ contract Auction is Ownable {
 
     uint auctionId = 0;
 
-    // /***********
-    //  *  EVENTS *
-    //  ***********/
+    /**********
+     * EVENTS *
+     **********/
 
     // @todo should be indexed
     event AuctionCreated(uint auctionId, Item item);
@@ -107,9 +108,9 @@ contract Auction is Ownable {
         return (itemIds, highestBidders);
     }
 
-    // /************
-    //  *  HELPERS *
-    //  ************/
+    /************
+     *  HELPERS *
+     ************/
 
     function _transferToPrevBidder(
         address payable _prevBidder,
