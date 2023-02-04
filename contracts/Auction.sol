@@ -18,7 +18,7 @@ contract Auction is Ownable {
     struct Item {
         uint itemId;
         string itemName;
-        uint256 startingPrice; // starting price @todo change name to startingPrice
+        uint256 startingPrice;
         uint highestBid;
         address highestBidder;
     }
