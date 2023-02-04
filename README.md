@@ -57,9 +57,12 @@
 - I would have liked to add a Factory contract. Usually such contracts come with Factory contracts to allow various users to create different contracts of the same type. The basic Factory contract is there in the contracts folder but I did not implement
 - Would be nice to handle ERC20 for bids
 - Liked to have used an Oracle to set prices in USD or even a sort of NFT barter system
-- Would be nice to use NFTs  for each item 
+- Would be nice to use NFT representation for each item 
 - For better user experience gas cost can probably reduced more, using bytes instead of strings etc.
 - Sell certain quantity of items, with each piece sold the price of the item increases by a percentage
 - Allow bidders to set a maximum bid as well i.e. how high they are willing to go. Would save them gas cost of trying to constantly outbid
 - A basic frontend would have been nice and simple to implement for this
 - Maybe some prevention against sniping bots(?)
+- Allow for a reserve price to be set at the start of the auction
+- If starting price is not moved within a specific period of time the bid is lowered by a certain amount
+- Dutch auction type

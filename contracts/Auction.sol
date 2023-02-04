@@ -19,25 +19,27 @@ contract Auction {
 
     struct Auctions {
         uint auctionId;
-        string auctionName; // @todo make things quirky, AuctionName: Southeby's Auction of the Century
-        // AuctionName: Worst Mistake of Your Life
-        Item item;
-        uint256 highestBid;
-        address payable highestBidder; // @note is payable necessary? yes it is because we need to transfer money to the previous highest bidder
+        string auctionName; // AuctionName: Worst Mistake of Your Life
+        Item[] items;
         uint256 auctionEndTime;
     }
     struct Item {
+        uint itemId;
         string itemName;
         uint256 itemPrice; // starting price @todo change name to startingPrice
-        // @todo highestBid
-        // @todo highestBidder
-
-        // @todo add sold bool
-        // address highestBidder; @todo uncomment this and update the code
+        uint highestBid;
+        address highestBidder;
+        bool sold;
     }
 
     mapping(uint => Auctions) public auctions;
-    mapping(address => uint) public bidders;
+
+    uint auctionId = 0;
+
+    // mapping(address => uint) public bidders;
+    // !how about this: itemId => address of the highest bidder
+    // *have to loop through the items anyway, because we need to find the highest bidder for each item
+    mapping(uint => address) public itemHighestBidder;
 
     constructor() {
         owner = msg.sender;
@@ -62,23 +64,28 @@ contract Auction {
 
     // !is this even gonna work? probably not yet
     // @todo auctioneer must put ERC20 token
-    function createAuction(uint auctionId, Item memory item) public onlyOwner {
-        Auctions storage _auctions = auctions[auctionId++];
-        _auctions.auctionId = auctionId;
-        _auctions.item = item;
-        // @note could be a mapping?
-        _auctions.highestBid = item.itemPrice; // starting price, this way we won't have to check if the bid is higher than the starting price
-        // _auctions.highestBidder = address (0); // not necessary, solidity does this by default
-        _auctions.auctionEndTime = block.timestamp + 1 days;
+    function createAuction(
+        Item[] memory items,
+        string memory auctionName
+    ) public onlyOwner {
+        // create a new auction with an array of items
 
-        emit AuctionCreated(auctionId, item);
+        auctions[auctionId++] = Auctions({
+            auctionId: auctionId,
+            auctionName: auctionName,
+            items: items,
+            auctionEndTime: block.timestamp + 1 days
+        });
     }
 
     // * this function adds balance to the contract
-    function placeBid(uint auctionId) public payable {
-        // if the auction time has ended then find the highest bidder and transfer the item to the highest bidder
-        if (auctions[auctionId].auctionEndTime > block.timestamp) {
-            findHighestBidder(auctionId);
+    function placeBid(uint _auctionId, uint _itemId) public payable {
+        // if the auction time has ended then find the highest bidder and emit the event AuctionEnded
+        if (auctions[_auctionId].auctionEndTime > block.timestamp) {
+            // !note do I have to send back the money to the bidder?
+            payable(msg.sender).transfer(msg.value);
+            // _findHighestBidders(auctionId);
+            return;
         }
 
         require(
@@ -87,21 +94,20 @@ contract Auction {
         );
 
         require(
-            msg.value > auctions[auctionId].highestBid,
-            "Your bid is lower than the highest bid." // @todo use custom error to save gas
-        );
-        require(
             block.timestamp < auctions[auctionId].auctionEndTime,
             "Auction has ended." // @todo use custom error to save gas
         );
         require(msg.sender != owner, "Owner cannott bid on their own auction."); // @todo use custom error to save gas
 
         // if the above conditions are met then we want to transger the previous highest bidder their money
-        address prevHighestBidder = auctions[auctionId].highestBidder;
-        uint256 prevHighestBid = auctions[auctionId].highestBid;
+        address prevHighestBidder = auctions[_auctionId]
+            .items[_itemId]
+            .highestBidder;
+        uint256 prevHighestBid = auctions[auctionId].items[_itemId].highestBid;
 
-        auctions[auctionId].highestBid = msg.value;
-        auctions[auctionId].highestBidder = payable(msg.sender);
+        auctions[auctionId].items[_itemId].highestBid = msg.value;
+        auctions[auctionId].items[_itemId].highestBidder = payable(msg.sender);
+        // we refund the previous highest bidder their money, as they have been outbid
         transferToPrevBidder(payable(prevHighestBidder), prevHighestBid);
         emit BidPlaced(auctionId, msg.value, msg.sender);
     }
@@ -116,14 +122,24 @@ contract Auction {
      *  HELPERS *
      ************/
 
-    function findHighestBidder(uint _auctionId) private {
-        // @todo loop through all the items in the auction and find the highest bidders
-        // return the array of highest bidders for each item
+    // Finds the highest bidder for each item in the auction and returns an array of addresses
+    function _findHighestBidders(
+        uint _auctionId
+    ) public view onlyOwner returns (uint[] memory, address[] memory) {
+        require(
+            auctions[_auctionId].auctionEndTime < block.timestamp,
+            "Auction has not ended yet."
+        );
 
-        address auctionWinner = auctions[_auctionId].highestBidder;
-        uint256 highestBid = auctions[_auctionId].highestBid;
-        // @todo find the highest bidder for each item
-        emit AuctionEnded(_auctionId, highestBid, auctionWinner);
+        Item[] memory itemList = auctions[_auctionId].items;
+        address[] memory highestBidders = new address[](itemList.length);
+        uint[] memory itemIds = new uint[](itemList.length);
+
+        for (uint i = 0; i < itemList.length; i++) {
+            highestBidders[i] = itemList[i].highestBidder;
+            itemIds[i] = itemList[i].itemId;
+        }
+        return (itemIds, highestBidders);
     }
 
     function transferToPrevBidder(
