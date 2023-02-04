@@ -108,7 +108,7 @@ contract Auction {
         auctions[auctionId].items[_itemId].highestBid = msg.value;
         auctions[auctionId].items[_itemId].highestBidder = payable(msg.sender);
         // we refund the previous highest bidder their money, as they have been outbid
-        transferToPrevBidder(payable(prevHighestBidder), prevHighestBid);
+        _transferToPrevBidder(payable(prevHighestBidder), prevHighestBid);
         emit BidPlaced(auctionId, msg.value, msg.sender);
     }
 
@@ -118,12 +118,8 @@ contract Auction {
         _;
     }
 
-    /************
-     *  HELPERS *
-     ************/
-
     // Finds the highest bidder for each item in the auction and returns an array of addresses
-    function _findHighestBidders(
+    function findHighestBidders(
         uint _auctionId
     ) public view onlyOwner returns (uint[] memory, address[] memory) {
         require(
@@ -142,7 +138,11 @@ contract Auction {
         return (itemIds, highestBidders);
     }
 
-    function transferToPrevBidder(
+    /************
+     *  HELPERS *
+     ************/
+
+    function _transferToPrevBidder(
         address payable _prevBidder,
         uint prevHighestBid
     ) private {
