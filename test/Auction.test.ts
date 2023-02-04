@@ -12,7 +12,7 @@ import { Auction } from '../typechain-types/Auction';
 // @todo turn on ESLint
 
 // sample item for testing
-const Item: Auction.ItemStruct = {
+const Item = {
   itemName: 'Movie Ticket',
   itemPrice: 100,
 };

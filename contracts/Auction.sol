@@ -13,6 +13,7 @@ contract Auction is Ownable {
         Item[] items;
         uint256 auctionEndTime;
     }
+
     struct Item {
         uint itemId;
         string itemName;
@@ -25,9 +26,9 @@ contract Auction is Ownable {
 
     uint auctionId = 0;
 
-    /***********
-     *  EVENTS *
-     ***********/
+    // /***********
+    //  *  EVENTS *
+    //  ***********/
 
     // @todo should be indexed
     event AuctionCreated(uint auctionId, Item item);
@@ -42,14 +43,12 @@ contract Auction is Ownable {
         Item[] memory items,
         string memory auctionName
     ) public onlyOwner {
-        // create a new auction with an array of items
-
-        auctions[auctionId++] = Auctions({
-            auctionId: auctionId,
-            auctionName: auctionName,
-            items: items,
-            auctionEndTime: block.timestamp + 1 days
-        });
+        Auctions memory newAuction = auctions[auctionId];
+        // @note not allowed to do this newAuction.items = items, because not allowed to map memory to storage directly
+        _createItemList(items);
+        newAuction.auctionId = auctionId;
+        newAuction.auctionName = auctionName;
+        newAuction.auctionEndTime = block.timestamp + 1 days;
     }
 
     // * this function adds balance to the contract
@@ -108,14 +107,20 @@ contract Auction is Ownable {
         return (itemIds, highestBidders);
     }
 
-    /************
-     *  HELPERS *
-     ************/
+    // /************
+    //  *  HELPERS *
+    //  ************/
 
     function _transferToPrevBidder(
         address payable _prevBidder,
         uint prevHighestBid
     ) private {
         _prevBidder.transfer(prevHighestBid);
+    }
+
+    function _createItemList(Item[] memory _itemsList) private {
+        for (uint i = 0; i < _itemsList.length; i++) {
+            auctions[auctionId].items.push(_itemsList[i]);
+        }
     }
 }
