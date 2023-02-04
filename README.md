@@ -29,7 +29,7 @@
 
 ### Errors
 - Custom errors can cost quite a bit of gas 
-- For `revert` the same OPCODE is used as with `require` since the update (can't remember now, think it was last year)
+- For `revert` the same OPCODE is used as with `require` since the update (think it was last year)
 
 ### Restrictions
 - To set access control I am using OpenZeppelin's `Ownable` contract. It probably costs more gas (?)
@@ -39,6 +39,8 @@
 - Contract deployer is set as the `owner` of the contract
 - Only owner of the contract can create a new auction 
 - Only non-owners can call the `placeBid` function
+- OnlyOwner can call the `findHighestBidder` function (assuming that this would be called for the frontend only)
+- 
 
 
 # Tests
