@@ -4,14 +4,6 @@ pragma solidity ^0.8.9;
 // import "hardhat/console.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-/* 
-@todo install openzeppelin
-@todo use openzeppelin's ownable
-@todo create frontend if time permits
-@todo update the contract: see requirements
-@todo run slither
-*/
-
 contract Auction is Ownable {
     // state variables
 
