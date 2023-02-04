@@ -32,11 +32,7 @@ contract Auction is Ownable {
     // @todo should be indexed
     event AuctionCreated(uint auctionId, Item item);
     event BidPlaced(uint auctionId, uint256 highestBid, address highestBidder);
-    event AuctionEnded(
-        uint auctionId,
-        uint256 highestBid,
-        address highestBidder
-    );
+    event AuctionEnded(uint auctionId, string auctionName);
 
     /*********
      * MAIN *
@@ -61,7 +57,7 @@ contract Auction is Ownable {
         // if the auction time has ended then find the highest bidder and emit the event AuctionEnded
         if (auctions[_auctionId].auctionEndTime > block.timestamp) {
             payable(msg.sender).transfer(msg.value);
-            // _findHighestBidders(auctionId);
+            emit AuctionEnded(_auctionId, auctions[_auctionId].auctionName);
             return;
         }
 
