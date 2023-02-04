@@ -10,8 +10,8 @@ contract Auction is Ownable {
      *********************/
     struct Auctions {
         uint auctionId;
-        string auctionName; // AuctionName: Worst Mistake of Your Life
-        Item[] items; // ItemName: "That bad yoghurt you ate just before exams"
+        string auctionName;
+        Item[] items;
         uint256 auctionEndTime;
     }
 
