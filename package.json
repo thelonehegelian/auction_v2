@@ -6,6 +6,8 @@
   },
   "dependencies": {
     "@nomicfoundation/hardhat-network-helpers": "^1.0.7",
-    "@openzeppelin/contracts": "^4.8.1"
+    "@openzeppelin/contracts": "^4.8.1",
+    "@typechain/ethers-v5": "^10.2.0",
+    "@typechain/hardhat": "^6.1.5"
   }
 }

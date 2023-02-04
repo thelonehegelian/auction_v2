@@ -18,7 +18,7 @@ contract Auction is Ownable {
     struct Item {
         uint itemId;
         string itemName;
-        uint256 itemPrice; // starting price @todo change name to startingPrice
+        uint256 startingPrice; // starting price @todo change name to startingPrice
         uint highestBid;
         address highestBidder;
     }
@@ -62,25 +62,27 @@ contract Auction is Ownable {
         }
 
         require(
-            auctions[auctionId].auctionEndTime > block.timestamp,
-            "Auction has ended." // @todo use custom error to save gas
-        );
+            msg.value >= auctions[_auctionId].items[_itemId].startingPrice,
+            "Bid amount is less than the starting price."
+        ); // @todo use custom error to save gas
 
         require(
-            block.timestamp < auctions[auctionId].auctionEndTime,
-            "Auction has ended." // @todo use custom error to save gas
-        );
+            msg.value > auctions[_auctionId].items[_itemId].highestBid,
+            "Bid amount is less than the highest bid."
+        ); // @todo use custom error to save gas
+
         require(
             msg.sender != owner(),
             "Owner cannott bid on their own auction."
         ); // @todo use custom error to save gas
 
-        // if the above conditions are met then we want to transger the previous highest bidder their money
+        // if the above conditions are met then we want to transfer the previous highest bidder their money
         address prevHighestBidder = auctions[_auctionId]
             .items[_itemId]
             .highestBidder;
         uint256 prevHighestBid = auctions[auctionId].items[_itemId].highestBid;
 
+        // we update the highest bid and highest bidder
         auctions[auctionId].items[_itemId].highestBid = msg.value;
         auctions[auctionId].items[_itemId].highestBidder = payable(msg.sender);
         // we refund the previous highest bidder their money, as they have been outbid
@@ -109,7 +111,7 @@ contract Auction is Ownable {
     }
 
     /************
-     *  HELPERS *
+     * HELPERS *
      ************/
 
     function _transferToPrevBidder(
@@ -123,5 +125,19 @@ contract Auction is Ownable {
         for (uint i = 0; i < _itemsList.length; i++) {
             auctions[auctionId].items.push(_itemsList[i]);
         }
+    }
+
+    /****************
+     * TEST HELPERS *
+     ****************/
+
+    function getAuction(uint _auctionId) public view returns (Auctions memory) {
+        return auctions[_auctionId];
+    }
+
+    function getAuctionItems(
+        uint _auctionId
+    ) public view returns (Item[] memory) {
+        return auctions[_auctionId].items;
     }
 }

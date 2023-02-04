@@ -747,7 +747,7 @@
     "lodash" "^4.17.15"
     "ts-essentials" "^7.0.1"
 
-"@typechain/hardhat@^6.1.2":
+"@typechain/hardhat@^6.1.2", "@typechain/hardhat@^6.1.5":
   "integrity" "sha512-lg7LW4qDZpxFMknp3Xool61Fg6Lays8F8TXdFGBG+MxyYcYU5795P1U2XdStuzGq9S2Dzdgh+1jGww9wvZ6r4Q=="
   "resolved" "https://registry.npmjs.org/@typechain/hardhat/-/hardhat-6.1.5.tgz"
   "version" "6.1.5"
