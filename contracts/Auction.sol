@@ -19,7 +19,6 @@ contract Auction is Ownable {
         uint256 itemPrice; // starting price @todo change name to startingPrice
         uint highestBid;
         address highestBidder;
-        bool sold;
     }
 
     mapping(uint => Auctions) public auctions;
@@ -40,11 +39,9 @@ contract Auction is Ownable {
     );
 
     /*********
-     *  MAIN *
+     * MAIN *
      *********/
 
-    // !is this even gonna work? probably not yet
-    // @todo auctioneer must put ERC20 token
     function createAuction(
         Item[] memory items,
         string memory auctionName
@@ -63,7 +60,6 @@ contract Auction is Ownable {
     function placeBid(uint _auctionId, uint _itemId) public payable {
         // if the auction time has ended then find the highest bidder and emit the event AuctionEnded
         if (auctions[_auctionId].auctionEndTime > block.timestamp) {
-            // !note do I have to send back the money to the bidder?
             payable(msg.sender).transfer(msg.value);
             // _findHighestBidders(auctionId);
             return;
