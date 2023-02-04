@@ -2,8 +2,7 @@
 pragma solidity ^0.8.9;
 
 // import "hardhat/console.sol";
-// ownable openzeppelin
-// import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 /* 
 @todo install openzeppelin
@@ -13,9 +12,8 @@ pragma solidity ^0.8.9;
 @todo run slither
 */
 
-contract Auction {
+contract Auction is Ownable {
     // state variables
-    address public owner;
 
     struct Auctions {
         uint auctionId;
@@ -40,10 +38,6 @@ contract Auction {
     // !how about this: itemId => address of the highest bidder
     // *have to loop through the items anyway, because we need to find the highest bidder for each item
     mapping(uint => address) public itemHighestBidder;
-
-    constructor() {
-        owner = msg.sender;
-    }
 
     /***********
      *  EVENTS *
@@ -97,7 +91,10 @@ contract Auction {
             block.timestamp < auctions[auctionId].auctionEndTime,
             "Auction has ended." // @todo use custom error to save gas
         );
-        require(msg.sender != owner, "Owner cannott bid on their own auction."); // @todo use custom error to save gas
+        require(
+            msg.sender != owner(),
+            "Owner cannott bid on their own auction."
+        ); // @todo use custom error to save gas
 
         // if the above conditions are met then we want to transger the previous highest bidder their money
         address prevHighestBidder = auctions[_auctionId]
@@ -110,12 +107,6 @@ contract Auction {
         // we refund the previous highest bidder their money, as they have been outbid
         _transferToPrevBidder(payable(prevHighestBidder), prevHighestBid);
         emit BidPlaced(auctionId, msg.value, msg.sender);
-    }
-
-    // onlyOwner modifier
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Only owner can call this function."); // @todo use custom error to save gas
-        _;
     }
 
     // Finds the highest bidder for each item in the auction and returns an array of addresses
