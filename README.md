@@ -44,6 +44,7 @@
 
 
 # Tests
+- There are test helper functions in the contract. I usually don't do it like this but in this case I needed to be quick to make sure everything worked as intended
 - Mostly self explanatory (in order):
 1. `contract creator should be the owner`
 2. `allow owner of the contract to create auctions`
