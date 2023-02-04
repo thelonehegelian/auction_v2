@@ -28,6 +28,14 @@ contract Auction is Ownable {
     uint auctionId = 0;
 
     /**********
+     * ERRORS *
+     **********/
+    error BidAmountLessThanStartingPrice();
+    error BidAmountLessThanHighestBid();
+    error OwnerCannotBidOnOwnAuction();
+    error AuctionHasEnded();
+
+    /**********
      * EVENTS *
      **********/
 
@@ -45,14 +53,14 @@ contract Auction is Ownable {
         string memory auctionName
     ) public onlyOwner {
         Auctions memory newAuction = auctions[auctionId];
-        // @note not allowed to do this newAuction.items = items, because not allowed to map memory to storage directly
+        // @note can't do this: newAuction.items = items, because not allowed to map memory to storage directly
         _createItemList(items);
         newAuction.auctionId = auctionId;
         newAuction.auctionName = auctionName;
         newAuction.auctionEndTime = block.timestamp + 1 days;
     }
 
-    // * this function adds balance to the contract
+    // *this function adds balance to the contract
     function placeBid(uint _auctionId, uint _itemId) public payable {
         // if the auction time has ended then find the highest bidder and emit the event AuctionEnded
         if (auctions[_auctionId].auctionEndTime > block.timestamp) {
