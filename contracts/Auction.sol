@@ -31,11 +31,10 @@ contract Auction is Ownable {
     /**********
      * ERRORS *
      **********/
-    error BidAmountLessThanStartingPrice();
-    error BidAmountLessThanHighestBid();
     error OwnerCannotBidOnOwnAuction();
     error AuctionHasNotEnded();
     error AuctionHasEnded();
+    error BidAmountIsLessThanStartingPriceOrHighestBid();
 
     /**********
      * EVENTS *
@@ -129,11 +128,12 @@ contract Auction is Ownable {
     }
 
     modifier bidMustBeValid(uint _auctionId, uint _itemId) {
-        require(
-            msg.value > auctions[_auctionId].items[_itemId].startingPrice &&
-                msg.value > auctions[_auctionId].items[_itemId].highestBid,
-            "Bid amount is less than the starting price or the highest bid."
-        );
+        if (
+            msg.value < auctions[_auctionId].items[_itemId].startingPrice ||
+            msg.value < auctions[_auctionId].items[_itemId].highestBid
+        ) {
+            revert BidAmountIsLessThanStartingPriceOrHighestBid();
+        }
         _;
     }
 
