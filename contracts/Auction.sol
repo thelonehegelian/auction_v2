@@ -34,6 +34,7 @@ contract Auction is Ownable {
     error BidAmountLessThanStartingPrice();
     error BidAmountLessThanHighestBid();
     error OwnerCannotBidOnOwnAuction();
+    error AuctionHasNotEnded();
     error AuctionHasEnded();
 
     /**********
@@ -59,30 +60,33 @@ contract Auction is Ownable {
         newAuction.auctionId = auctionId;
         newAuction.auctionName = auctionName;
         /**  
-         block.timestamp is not always suited, as it can be manipulated by miners but only a few seconds
+         block.timestamp is not always suited, as it can be manipulated by miners but only a few seconds, in this case it should be okay
          https://stackoverflow.com/questions/71000103/solidity-block-timestamp-vulnerability
          https://consensys.github.io/smart-contract-best-practices/development-recommendations/solidity-specific/timestamp-dependence/
          this might be a better solution but never tried it:
          https://docs.chain.link/chainlink-automation/introduction/#time-based-trigger
          */
-        newAuction.auctionEndTime = block.timestamp + 10 days;
+        newAuction.auctionEndTime = block.timestamp + 1 days;
         newAuction.isEnded = false;
         auctionId++;
     }
 
     // *this function adds balance to the contract
-    function placeBid(uint _auctionId, uint _itemId) public payable nonOwner {
-        require(
-            msg.value > auctions[_auctionId].items[_itemId].startingPrice,
-            "Bid amount is less than the starting price."
-        );
-        // if the auction time has ended then find the highest bidder and emit the event AuctionEnded
+    function placeBid(
+        uint _auctionId,
+        uint _itemId
+    )
+        public
+        payable
+        nonOwner
+        // @todo can I combine these two modifiers into one?
+        bidMustBeValid(_auctionId, _itemId)
+    {
+        // // if the auction time has ended then find the highest bidder and emit the event AuctionEnded
         if (block.timestamp >= auctions[_auctionId].auctionEndTime) {
-            payable(msg.sender).transfer(msg.value);
             // @note a private _endAuction function can be used take care of the settlement here
             emit AuctionEnded(_auctionId, auctions[_auctionId].auctionName);
-            // @note isn't return implicit?
-            return;
+            revert AuctionHasEnded();
         }
 
         // we transfer the previous highest bid to the previous highest bidder
@@ -101,13 +105,11 @@ contract Auction is Ownable {
     // Finds the highest bidder for each item in the auction and returns an array of addresses
     function findHighestBidders(
         uint _auctionId
-    )
-        public
-        view
-        onlyOwner
-        auctionEnded(auctionId)
-        returns (uint[] memory, address[] memory)
-    {
+    ) public view onlyOwner returns (uint[] memory, address[] memory) {
+        if (block.timestamp <= auctions[_auctionId].auctionEndTime) {
+            revert AuctionHasNotEnded();
+        }
+
         Item[] memory itemList = auctions[_auctionId].items;
         address[] memory highestBidders = new address[](itemList.length);
         uint[] memory itemIds = new uint[](itemList.length);
@@ -120,18 +122,9 @@ contract Auction is Ownable {
     }
 
     modifier nonOwner() {
-        require(
-            msg.sender != owner(),
-            "Owner cannot bid on their own auction."
-        );
-        _;
-    }
-
-    modifier auctionEnded(uint _auctionId) {
-        require(
-            block.timestamp >= auctions[_auctionId].auctionEndTime,
-            "Auction has not ended."
-        );
+        if (msg.sender == owner()) {
+            revert OwnerCannotBidOnOwnAuction();
+        }
         _;
     }
 
@@ -148,6 +141,15 @@ contract Auction is Ownable {
         require(
             msg.value > auctions[_auctionId].items[_itemId].highestBid,
             "Bid amount is less than the highest bid."
+        );
+        _;
+    }
+
+    modifier bidMustBeValid(uint _auctionId, uint _itemId) {
+        require(
+            msg.value > auctions[_auctionId].items[_itemId].startingPrice &&
+                msg.value > auctions[_auctionId].items[_itemId].highestBid,
+            "Bid amount is less than the starting price or the highest bid."
         );
         _;
     }

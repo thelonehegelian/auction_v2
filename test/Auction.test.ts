@@ -110,5 +110,16 @@ describe('Auction', function () {
       await expect(auction.connect(bidder1).placeBid(0, 1, { value: 101 })).to
         .be.reverted;
     });
+
+    it('should not allow settlement if the auction has not ended', async function () {
+      const { auction } = await loadFixture(deployAuctionFixture);
+      await auction.createAuction(items, auctionName);
+      await expect(auction.findHighestBidders(0)).to.be.reverted;
+      // after auction end time should be able to settle
+      const now = await time.latest();
+      const twoDays = 172800;
+      await time.increase(now + twoDays);
+      await expect(auction.findHighestBidders(0)).to.not.be.reverted;
+    });
   });
 });
