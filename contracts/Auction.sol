@@ -133,6 +133,7 @@ contract Auction is Ownable, ReentrancyGuard {
             msg.value < auctions[_auctionId].items[_itemId].startingPrice ||
             msg.value < auctions[_auctionId].items[_itemId].highestBid
         ) {
+            // though starting price and highest bid are the same in our example
             revert BidAmountIsLessThanStartingPriceOrHighestBid();
         }
         _;
@@ -143,7 +144,7 @@ contract Auction is Ownable, ReentrancyGuard {
     /// @param prevHighestBid - amount of the previous highest bid
     // is reentrancy attack possible here? this is a private function so it should be okay
     // also currently contract would have balance only contributed by the previous bidder
-    // so more than that balance cannot be taken out
+    // so more balance than that cannot be taken out
     function _transferToPrevBidder(
         address payable _prevBidder,
         uint prevHighestBid
