@@ -109,11 +109,8 @@ contract Auction is Ownable {
     // Finds the highest bidder for each item in the auction and returns an array of addresses
     function findHighestBidders(
         uint _auctionId
-    ) public view onlyOwner returns (uint[] memory, address[] memory) {
-        require(
-            block.timestamp >= auctions[_auctionId].auctionEndTime,
-            "Auction has not ended yet."
-        );
+    ) public view onlyOwner auctionEnded returns (uint[] memory, address[] memory) {
+       
 
         Item[] memory itemList = auctions[_auctionId].items;
         address[] memory highestBidders = new address[](itemList.length);
@@ -132,6 +129,17 @@ contract Auction is Ownable {
             "Owner cannot bid on their own auction."
         );
         _;
+    }
+
+    modifier auctionEnded(uint _auctionId) {
+        require(
+            block.timestamp >= auctions[_auctionId].auctionEndTime,
+            "Auction has not ended."
+        );
+        _;
+    }
+    
+        
     }
 
     /************
