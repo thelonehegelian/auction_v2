@@ -3,8 +3,10 @@ pragma solidity ^0.8.9;
 
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+// import reentrancy from openzeppelin
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-contract Auction is Ownable {
+contract Auction is Ownable, ReentrancyGuard {
     struct Auctions {
         uint auctionId; // could be useful if there was a factory contract
         string auctionName;
@@ -65,10 +67,12 @@ contract Auction is Ownable {
     /// @param _auctionId - id of the auction
     /// @param _itemId - id of the item
     /// @notice - this function adds balance to the contract
+    // don't think reentrancy attack is possible here but to be sure we use the nonReentrant modifier
+    // see comments in the _transferToPrevBidder function
     function placeBid(
         uint _auctionId,
         uint _itemId
-    ) public payable nonOwner bidMustBeValid(_auctionId, _itemId) {
+    ) public payable nonOwner nonReentrant bidMustBeValid(_auctionId, _itemId) {
         // if the auction time has ended then find the highest bidder and emit the event AuctionEnded
         if (block.timestamp >= auctions[_auctionId].auctionEndTime) {
             // @note a private _endAuction function can be used take care of the settlement here
@@ -76,17 +80,19 @@ contract Auction is Ownable {
             revert AuctionHasEnded();
         }
 
-        // we transfer the previous highest bid to the previous highest bidder
         address prevHighestBidder = auctions[_auctionId]
             .items[_itemId]
             .highestBidder;
         uint prevHighestBid = auctions[_auctionId].items[_itemId].highestBid;
-        _transferToPrevBidder(payable(prevHighestBidder), prevHighestBid);
-        // update the highest bid and highest bidder
+        // updating states before calling transfer
         auctions[_auctionId].items[_itemId].highestBid = msg.value;
         auctions[_auctionId].items[_itemId].highestBidder = msg.sender;
 
         emit BidPlaced(auctionId, msg.value, msg.sender);
+        // is this check necessary?
+        if (prevHighestBidder != address(0)) {
+            _transferToPrevBidder(payable(prevHighestBidder), prevHighestBid);
+        }
     }
 
     /// Finds the highest bidder for each item in the auction and returns an array of addresses
@@ -135,6 +141,9 @@ contract Auction is Ownable {
     /*************HELPERS**************/
     /// @param _prevBidder - address of the previous highest bidder
     /// @param prevHighestBid - amount of the previous highest bid
+    // is reentrancy attack possible here? this is a private function so it should be okay
+    // also currently contract would have balance only contributed by the previous bidder
+    // so more than that balance cannot be taken out
     function _transferToPrevBidder(
         address payable _prevBidder,
         uint prevHighestBid
