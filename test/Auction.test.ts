@@ -83,15 +83,19 @@ describe('Auction', function () {
         .reverted;
     });
 
-    // @todo fix this
-    it('Should allow bid greater than highest bid', async function () {
+    it('Should update higher bid and bidder', async function () {
       const { auction, bidder1, bidder2 } = await loadFixture(
         deployAuctionFixture
       );
       await auction.createAuction(items, auctionName);
-
       await auction.connect(bidder1).placeBid(0, 1, { value: 110 });
-      console.log(await (await auction.getAuction(0)).items);
+      let activeAuction = await auction.getAuction(0);
+      let highestBidItem2 = activeAuction.items[1].highestBid;
+      expect(highestBidItem2).to.equal(110);
+      await auction.connect(bidder2).placeBid(0, 1, { value: 120 });
+      activeAuction = await auction.getAuction(0);
+      highestBidItem2 = activeAuction.items[1].highestBid;
+      expect(highestBidItem2).to.equal(120);
     });
 
     it('Should not allow bid after auction end time', async function () {

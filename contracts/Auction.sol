@@ -85,17 +85,17 @@ contract Auction is Ownable {
             return;
         }
 
+        // we transfer the previous highest bid to the previous highest bidder
         address prevHighestBidder = auctions[_auctionId]
             .items[_itemId]
             .highestBidder;
-
         uint prevHighestBid = auctions[_auctionId].items[_itemId].highestBid;
-
+        _transferToPrevBidder(payable(prevHighestBidder), prevHighestBid);
         // update the highest bid and highest bidder
         auctions[_auctionId].items[_itemId].highestBid = msg.value;
         auctions[_auctionId].items[_itemId].highestBidder = msg.sender;
-        _transferToPrevBidder(payable(prevHighestBidder), prevHighestBid);
-        // emit BidPlaced(auctionId, msg.value, msg.sender);
+
+        emit BidPlaced(auctionId, msg.value, msg.sender);
     }
 
     // Finds the highest bidder for each item in the auction and returns an array of addresses
@@ -165,7 +165,6 @@ contract Auction is Ownable {
 
     function _createItemList(Item[] memory _itemsList) private {
         for (uint i = 0; i < _itemsList.length; i++) {
-            console.log(_itemsList[i].itemName);
             auctions[auctionId].items.push(_itemsList[i]);
         }
     }
@@ -174,13 +173,21 @@ contract Auction is Ownable {
      * TEST HELPERS *
      ****************/
 
-    function getAuction(uint _auctionId) public view returns (Auctions memory) {
+    /**
+     * To make testing easier, not recommended for production
+     * also Item[] inside Auction is not part of the ABI so we can't access it using mapping
+     * see: https://github.com/NomicFoundation/hardhat/issues/2433
+     * There is probably a way to do deal with that without using the functions below
+     */
+    function getAuction(
+        uint _auctionId
+    ) external view returns (Auctions memory) {
         return auctions[_auctionId];
     }
 
     function getAuctionItems(
         uint _auctionId
-    ) public view returns (Item[] memory) {
+    ) external view returns (Item[] memory) {
         return auctions[_auctionId].items;
     }
 }
