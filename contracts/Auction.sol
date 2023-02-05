@@ -25,27 +25,22 @@ contract Auction is Ownable {
 
     uint auctionId = 0;
 
-    /**********
-     * ERRORS *
-     **********/
-    error OwnerCannotBidOnOwnAuction();
-    error AuctionHasNotEnded();
-    error AuctionHasEnded();
-    error BidAmountIsLessThanStartingPriceOrHighestBid();
-
-    /**********
-     * EVENTS *
-     **********/
-
+    /*************EVENTS**************/
     // @todo should be indexed for better filtering in the frontend
     event AuctionCreated(uint auctionId, Item item);
     event BidPlaced(uint auctionId, uint256 highestBid, address highestBidder);
     event AuctionEnded(uint auctionId, string auctionName);
 
-    /*********
-     * MAIN *
-     *********/
+    /*************ERRORS**************/
+    error OwnerCannotBidOnOwnAuction();
+    error AuctionHasNotEnded();
+    error AuctionHasEnded();
+    error BidAmountIsLessThanStartingPriceOrHighestBid();
 
+    /*************MAIN**************/
+
+    /// @param items - array of items to be auctioned
+    /// @param auctionName - name of the auction
     function createAuction(
         Item[] memory items,
         string memory auctionName
@@ -67,7 +62,9 @@ contract Auction is Ownable {
         auctionId++;
     }
 
-    // *this function adds balance to the contract
+    /// @param _auctionId - id of the auction
+    /// @param _itemId - id of the item
+    /// @notice - this function adds balance to the contract
     function placeBid(
         uint _auctionId,
         uint _itemId
@@ -92,7 +89,10 @@ contract Auction is Ownable {
         emit BidPlaced(auctionId, msg.value, msg.sender);
     }
 
-    // Finds the highest bidder for each item in the auction and returns an array of addresses
+    /// Finds the highest bidder for each item in the auction and returns an array of addresses
+    /// @param _auctionId - id of the auction
+    /// @return - array of item ids
+    /// @return - array of addresses of the highest bidders
     function findHighestBidders(
         uint _auctionId
     ) public view onlyOwner returns (uint[] memory, address[] memory) {
@@ -114,6 +114,7 @@ contract Auction is Ownable {
         return (itemIds, highestBidders);
     }
 
+    /*************MODIFIERS**************/
     modifier nonOwner() {
         if (msg.sender == owner()) {
             revert OwnerCannotBidOnOwnAuction();
@@ -131,10 +132,9 @@ contract Auction is Ownable {
         _;
     }
 
-    /************
-     * HELPERS *
-     ************/
-
+    /*************HELPERS**************/
+    /// @param _prevBidder - address of the previous highest bidder
+    /// @param prevHighestBid - amount of the previous highest bid
     function _transferToPrevBidder(
         address payable _prevBidder,
         uint prevHighestBid
@@ -151,22 +151,22 @@ contract Auction is Ownable {
         }
     }
 
-    /****************
-     * TEST HELPERS *
-     ****************/
-
+    /*************TEST HELPERS**************/
     /**
      * To make testing easier, not recommended for production
      * also Item[] inside Auction is not part of the ABI so we can't access it using mapping
      * see: https://github.com/NomicFoundation/hardhat/issues/2433
      * There is probably a way to do deal with that without using the functions below
      */
+
+    /// @param _auctionId - id of the auction
     function getAuction(
         uint _auctionId
     ) external view returns (Auctions memory) {
         return auctions[_auctionId];
     }
 
+    /// @param _auctionId - id of the auction
     function getAuctionItems(
         uint _auctionId
     ) external view returns (Item[] memory) {
