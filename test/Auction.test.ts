@@ -4,9 +4,7 @@ import { ethers } from 'hardhat';
 import { Auction } from '../typechain-types/contracts/Auction';
 import { BigNumber } from 'ethers';
 
-// @note feels like I am missing something here
 // @note currently only concerned with a single auction
-// @note be careful not to reuse variables
 
 const auctionName = 'Worst Mistakes of Your Life';
 // sample items for testing
@@ -34,7 +32,8 @@ const items = [
   },
 ];
 
-const BID_AMOUNT = ethers.utils.parseEther('125');
+const BID_AMOUNT_ONE = ethers.utils.parseEther('125');
+const BID_AMOUNT_TWO = ethers.utils.parseEther('150');
 
 describe('Auction', function () {
   // @note also possible to use hardhat-deploy
@@ -72,8 +71,9 @@ describe('Auction', function () {
     it('Should not allow owner/bid creator to bid', async function () {
       const { auction, owner } = await loadFixture(deployAuctionFixture);
       await auction.createAuction(items, auctionName);
-      await expect(auction.connect(owner).placeBid(0, 1, { value: 101 })).to.be
-        .reverted;
+      await expect(
+        auction.connect(owner).placeBid(0, 1, { value: BID_AMOUNT_ONE })
+      ).to.be.reverted;
     });
 
     it('Should not allow bid less than or equal to highest bid or the starting price', async function () {
@@ -88,14 +88,14 @@ describe('Auction', function () {
         deployAuctionFixture
       );
       await auction.createAuction(items, auctionName);
-      await auction.connect(bidder1).placeBid(0, 1, { value: 110 });
+      await auction.connect(bidder1).placeBid(0, 1, { value: BID_AMOUNT_ONE });
       let activeAuction = await auction.getAuction(0);
       let highestBidItem2 = activeAuction.items[1].highestBid;
-      expect(highestBidItem2).to.equal(110);
-      await auction.connect(bidder2).placeBid(0, 1, { value: 120 });
+      expect(highestBidItem2).to.equal(BID_AMOUNT_ONE);
+      await auction.connect(bidder2).placeBid(0, 1, { value: BID_AMOUNT_TWO });
       activeAuction = await auction.getAuction(0);
       highestBidItem2 = activeAuction.items[1].highestBid;
-      expect(highestBidItem2).to.equal(120);
+      expect(highestBidItem2).to.equal(BID_AMOUNT_TWO);
     });
 
     it('Should not allow bid after auction end time', async function () {
@@ -107,8 +107,9 @@ describe('Auction', function () {
 
       // increase time to two days after auction end time
       await time.increase(now + twoDays);
-      await expect(auction.connect(bidder1).placeBid(0, 1, { value: 101 })).to
-        .be.reverted;
+      await expect(
+        auction.connect(bidder1).placeBid(0, 1, { value: BID_AMOUNT_ONE })
+      ).to.be.reverted;
     });
 
     it('should not allow settlement if the auction has not ended', async function () {
