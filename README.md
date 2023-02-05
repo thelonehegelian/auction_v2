@@ -31,7 +31,7 @@
 - `AuctionEnded` 
 ### Errors
 - Custom errors can cost quite a bit of gas 
-- For `revert` the same OPCODE is used as with `require` since the update (think it was last year)
+- For `revert` the same OPCODE is used as with `require` since the update (think it was couple of years ago)
 
 ### Restrictions
 - To set access control I am using OpenZeppelin's `Ownable` contract. It probably costs more gas (?)
@@ -41,21 +41,19 @@
 - Contract deployer is set as the `owner` of the contract
 - Only owner of the contract can create a new auction 
 - Only non-owners can call the `placeBid` function
-- OnlyOwner can call the `findHighestBidder` function (assuming that this would be called for the frontend only)
-- 
-
+- OnlyOwner can call the `findHighestBidder` function (assuming that this would be called for the frontend only), can also be made to use to settle auction
+- `findHighestBidder` cannot be called unless the auction time is up
 
 # Tests
 - There are test helper functions in the contract. I usually don't do it like this but in this case I needed to be quick to make sure everything worked as intended
-- Mostly self explanatory (in order):
-1. `contract creator should be the owner`
-2. `allow owner of the contract to create auctions`
-   1. [ ] both above should be one test
-3. `creates an auction`
-4. `does not allow owner of the auction to bid`
-5. `bidding less than highest bid is not allowed`
-6. `allow bid greater than highest bid`
-7. `not allow bid after auction end time`
+1. Contract has an owner that is the deploer of the contract
+2. Only owner of the contract can create a new auction
+3. Auction is created successfully
+4. Owner of the contract (creator of auction) is not allowed to place a bid
+5. Bids less than the previous high bid or less than starting price are not allowed
+6. New high bid is updated as well as the highest bidder
+7. Does not allow bids after auction time is up
+8. Does not allow settlement if the auction has not ended. Does not allow non-owners to call `findHighestBidder`
 
 # Things would have like to try
 - I would have liked to add a Factory contract. Usually such contracts come with Factory contracts to allow various users to create different contracts of the same type. The basic Factory contract is there in the contracts folder but I did not implement
