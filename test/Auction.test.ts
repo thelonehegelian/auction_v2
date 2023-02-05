@@ -129,9 +129,15 @@ describe('Auction', function () {
     });
 
     it('should not allow settlement if the auction has not ended', async function () {
-      const { auction } = await loadFixture(deployAuctionFixture);
+      const { auction, owner, bidder1 } = await loadFixture(
+        deployAuctionFixture
+      );
       await auction.createAuction(items, auctionName);
-      await expect(auction.findHighestBidders(0)).to.be.reverted;
+      // unauthorized user should not be able to settle
+      await expect(auction.connect(bidder1).findHighestBidders(0)).to.be
+        .reverted;
+
+      await expect(auction.connect(owner).findHighestBidders(0)).to.be.reverted;
       // after auction end time should be able to settle
       const now = await time.latest();
       const twoDays = 172800;
