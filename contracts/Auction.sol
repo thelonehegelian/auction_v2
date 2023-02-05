@@ -5,11 +5,8 @@ import "hardhat/console.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract Auction is Ownable {
-    /*********************
-     *  STATE VARIABLES  *
-     *********************/
     struct Auctions {
-        uint auctionId;
+        uint auctionId; // could be useful if there was a factory contract
         string auctionName;
         Item[] items;
         uint auctionEndTime;
@@ -74,13 +71,7 @@ contract Auction is Ownable {
     function placeBid(
         uint _auctionId,
         uint _itemId
-    )
-        public
-        payable
-        nonOwner
-        // @todo can I combine these two modifiers into one?
-        bidMustBeValid(_auctionId, _itemId)
-    {
+    ) public payable nonOwner bidMustBeValid(_auctionId, _itemId) {
         // if the auction time has ended then find the highest bidder and emit the event AuctionEnded
         if (block.timestamp >= auctions[_auctionId].auctionEndTime) {
             // @note a private _endAuction function can be used take care of the settlement here
@@ -113,9 +104,12 @@ contract Auction is Ownable {
         address[] memory highestBidders = new address[](itemList.length);
         uint[] memory itemIds = new uint[](itemList.length);
 
-        for (uint i = 0; i < itemList.length; i++) {
+        for (uint i = 0; i < itemList.length; ) {
             highestBidders[i] = itemList[i].highestBidder;
             itemIds[i] = itemList[i].itemId;
+            unchecked {
+                i += 1;
+            }
         }
         return (itemIds, highestBidders);
     }
@@ -149,8 +143,11 @@ contract Auction is Ownable {
     }
 
     function _createItemList(Item[] memory _itemsList) private {
-        for (uint i = 0; i < _itemsList.length; i++) {
+        for (uint i = 0; i < _itemsList.length; ) {
             auctions[auctionId].items.push(_itemsList[i]);
+            unchecked {
+                i += 1;
+            }
         }
     }
 
