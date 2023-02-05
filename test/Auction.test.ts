@@ -39,12 +39,12 @@ const ACCOUNT_BALANCE = ethers.utils.parseEther('10000'); // 10,000 ETH for test
 describe('Auction', function () {
   // @note also possible to use hardhat-deploy
   async function deployAuctionFixture() {
-    const [owner, bidder1, bidder2] = await ethers.getSigners();
+    const [owner, bidder1, bidder2, bidder3] = await ethers.getSigners();
 
     const Auction = await ethers.getContractFactory('Auction');
     const auction = await Auction.deploy();
 
-    return { auction, owner, bidder1, bidder2 };
+    return { auction, owner, bidder1, bidder2, bidder3 };
   }
 
   describe('Deployment', function () {
@@ -143,6 +143,26 @@ describe('Auction', function () {
       const twoDays = 172800;
       await time.increase(now + twoDays);
       await expect(auction.findHighestBidders(0)).to.not.be.reverted;
+    });
+
+    it('should get highest bidders', async function () {
+      const { auction, bidder1, bidder2, bidder3 } = await loadFixture(
+        deployAuctionFixture
+      );
+      await auction.createAuction(items, auctionName);
+      await auction.connect(bidder1).placeBid(0, 0, { value: BID_AMOUNT_ONE });
+      await auction.connect(bidder2).placeBid(0, 1, { value: BID_AMOUNT_TWO });
+      await auction.connect(bidder3).placeBid(0, 2, { value: BID_AMOUNT_ONE });
+
+      // end the auction
+      const now = await time.latest();
+      const twoDays = 172800;
+      await time.increase(now + twoDays);
+
+      const highestBidders = await auction.findHighestBidders(0);
+      expect(highestBidders[1][0]).equal(bidder1.address);
+      expect(highestBidders[1][1]).equal(bidder2.address);
+      expect(highestBidders[1][2]).equal(bidder3.address);
     });
   });
 });
