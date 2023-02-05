@@ -5,27 +5,26 @@ import { Auction } from '../typechain-types/contracts/Auction';
 import { BigNumber } from 'ethers';
 
 // @note currently only concerned with a single auction
-
-const auctionName = 'Worst Mistakes of Your Life';
+const auctionName = 'Southebys Auction';
 // sample items for testing
 const items = [
   {
     itemId: BigNumber.from(0),
-    itemName: 'When you were born',
+    itemName: 'Overlook Hotel',
     startingPrice: BigNumber.from(100),
     highestBid: BigNumber.from(100),
     highestBidder: '0x0000000000000000000000000000000000000000',
   },
   {
     itemId: BigNumber.from(1),
-    itemName: 'The day you wore that shirt',
+    itemName: 'Volkswagen Beetle',
     startingPrice: BigNumber.from(100),
     highestBid: BigNumber.from(100),
     highestBidder: '0x0000000000000000000000000000000000000000',
   },
   {
     itemId: BigNumber.from(2),
-    itemName: 'The day of your graduation',
+    itemName: 'The Shining',
     startingPrice: BigNumber.from(100),
     highestBid: BigNumber.from(100),
     highestBidder: '0x0000000000000000000000000000000000000000',
