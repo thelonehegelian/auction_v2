@@ -81,7 +81,7 @@ contract Auction is Ownable {
         // @todo can I combine these two modifiers into one?
         bidMustBeValid(_auctionId, _itemId)
     {
-        // // if the auction time has ended then find the highest bidder and emit the event AuctionEnded
+        // if the auction time has ended then find the highest bidder and emit the event AuctionEnded
         if (block.timestamp >= auctions[_auctionId].auctionEndTime) {
             // @note a private _endAuction function can be used take care of the settlement here
             emit AuctionEnded(_auctionId, auctions[_auctionId].auctionName);
