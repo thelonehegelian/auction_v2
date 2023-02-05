@@ -10,6 +10,7 @@
 - There is a time limit for the auction, which is fixed for now but perhaps should be set at `createBid`
 - Once the auction has ended no more bids are taken
 - `findHighestBidder` is used to find the highest bid nothin else is done at the end of the auction
+- Using `Ownable` from OpenZeppelin, it allows for transferring ownership
 
 ### Functions
 - `createAuction` -> Allows the owner to create an auction with a list of items
