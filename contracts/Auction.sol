@@ -73,6 +73,7 @@ contract Auction is Ownable {
         // if the auction time has ended then find the highest bidder and emit the event AuctionEnded
         if (block.timestamp >= auctions[_auctionId].auctionEndTime) {
             payable(msg.sender).transfer(msg.value);
+            // @note I would like to call a private _auctionEnded function here
             emit AuctionEnded(_auctionId, auctions[_auctionId].auctionName);
             return;
         }
@@ -86,11 +87,6 @@ contract Auction is Ownable {
             msg.value > auctions[_auctionId].items[_itemId].highestBid,
             "Bid amount is less than the highest bid."
         ); // @todo use custom error to save gas
-
-        // require(
-        //     block.timestamp < auctions[_auctionId].auctionEndTime,
-        //     "Auction has ended."
-        // ); // @todo use custom error to save gas
 
         // if the above conditions are met then we want to transfer the previous highest bidder their money
         address prevHighestBidder = auctions[_auctionId]
@@ -109,9 +105,13 @@ contract Auction is Ownable {
     // Finds the highest bidder for each item in the auction and returns an array of addresses
     function findHighestBidders(
         uint _auctionId
-    ) public view onlyOwner auctionEnded returns (uint[] memory, address[] memory) {
-       
-
+    )
+        public
+        view
+        onlyOwner
+        auctionEnded(auctionId)
+        returns (uint[] memory, address[] memory)
+    {
         Item[] memory itemList = auctions[_auctionId].items;
         address[] memory highestBidders = new address[](itemList.length);
         uint[] memory itemIds = new uint[](itemList.length);
@@ -137,9 +137,6 @@ contract Auction is Ownable {
             "Auction has not ended."
         );
         _;
-    }
-    
-        
     }
 
     /************
