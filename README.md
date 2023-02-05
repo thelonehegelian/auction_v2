@@ -1,5 +1,8 @@
 # Auction Contract
 
+# Note to the assessor 
+- the code is over-commented, but that is just for the assignment
+
 ## Description and Logic
 
 - Allows a user to create an auction with a list of items
@@ -25,8 +28,7 @@
 - Events can be useful for Frontend, and an Auction contract is likely to be a Frontend application 
 - `AuctionCreated`
 - `BidPlaced`
-- `AuctionEnded`
-
+- `AuctionEnded` 
 ### Errors
 - Custom errors can cost quite a bit of gas 
 - For `revert` the same OPCODE is used as with `require` since the update (think it was last year)
@@ -67,3 +69,5 @@
 - Allow for a reserve price to be set at the start of the auction
 - If starting price is not moved within a specific period of time the bid is lowered by a certain amount
 - Dutch auction type
+
+

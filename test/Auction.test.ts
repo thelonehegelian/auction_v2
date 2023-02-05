@@ -4,13 +4,9 @@ import { ethers } from 'hardhat';
 import { Auction } from '../typechain-types/contracts/Auction';
 import { BigNumber } from 'ethers';
 
-// @todo remember to use typechain
 // @note feels like I am missing something here
 // @note currently only concerned with a single auction
-// @note also possible to use hardhat-deploy
 // @note be careful not to reuse variables
-// @todo update revert messages
-// @todo turn on ESLint
 
 const auctionName = 'Worst Mistakes of Your Life';
 // sample items for testing
@@ -40,9 +36,8 @@ const items = [
 
 const BID_AMOUNT = ethers.utils.parseEther('125');
 
-// @note For ERC20 token we can either get tokens from whale address or do a storage hack
-
 describe('Auction', function () {
+  // @note also possible to use hardhat-deploy
   async function deployAuctionFixture() {
     const [owner, bidder1, bidder2] = await ethers.getSigners();
 
@@ -115,7 +110,7 @@ describe('Auction', function () {
 
     it('Should not allow bid after auction end time', async function () {
       const { auction, bidder1 } = await loadFixture(deployAuctionFixture);
-      const now = await time.latest(); // @note do I need this?
+      const now = await time.latest();
       const twoDays = 172800;
 
       await auction.createAuction(items, auctionName);

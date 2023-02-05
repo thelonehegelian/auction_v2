@@ -12,7 +12,8 @@ contract Auction is Ownable {
         uint auctionId;
         string auctionName;
         Item[] items;
-        uint256 auctionEndTime;
+        uint auctionEndTime;
+        bool isEnded;
     }
 
     struct Item {
@@ -39,7 +40,7 @@ contract Auction is Ownable {
      * EVENTS *
      **********/
 
-    // @todo should be indexed
+    // @todo should be indexed for better filtering in the frontend
     event AuctionCreated(uint auctionId, Item item);
     event BidPlaced(uint auctionId, uint256 highestBid, address highestBidder);
     event AuctionEnded(uint auctionId, string auctionName);
@@ -57,15 +58,20 @@ contract Auction is Ownable {
         _createItemList(items);
         newAuction.auctionId = auctionId;
         newAuction.auctionName = auctionName;
-        // block.timestamp is not always suited, as it can be manipulated by miners but only a few seconds
-        // https://stackoverflow.com/questions/71000103/solidity-block-timestamp-vulnerability
+        /**  
+         block.timestamp is not always suited, as it can be manipulated by miners but only a few seconds
+         https://stackoverflow.com/questions/71000103/solidity-block-timestamp-vulnerability
+         this might be a better solution but never tried it:
+         https://docs.chain.link/chainlink-automation/introduction/#time-based-trigger
+         */
         newAuction.auctionEndTime = block.timestamp + 1 days;
+        newAuction.isEnded = false;
     }
 
     // *this function adds balance to the contract
-    function placeBid(uint _auctionId, uint _itemId) public payable {
+    function placeBid(uint _auctionId, uint _itemId) public payable nonOwner {
         // if the auction time has ended then find the highest bidder and emit the event AuctionEnded
-        if (auctions[_auctionId].auctionEndTime > block.timestamp) {
+        if (block.timestamp >= auctions[_auctionId].auctionEndTime) {
             payable(msg.sender).transfer(msg.value);
             emit AuctionEnded(_auctionId, auctions[_auctionId].auctionName);
             return;
@@ -81,15 +87,10 @@ contract Auction is Ownable {
             "Bid amount is less than the highest bid."
         ); // @todo use custom error to save gas
 
-        require(
-            msg.sender != owner(),
-            "Owner cannott bid on their own auction."
-        ); // @todo use custom error to save gas
-
-        require(
-            block.timestamp < auctions[_auctionId].auctionEndTime,
-            "Auction has ended."
-        ); // @todo use custom error to save gas
+        // require(
+        //     block.timestamp < auctions[_auctionId].auctionEndTime,
+        //     "Auction has ended."
+        // ); // @todo use custom error to save gas
 
         // if the above conditions are met then we want to transfer the previous highest bidder their money
         address prevHighestBidder = auctions[_auctionId]
@@ -110,7 +111,7 @@ contract Auction is Ownable {
         uint _auctionId
     ) public view onlyOwner returns (uint[] memory, address[] memory) {
         require(
-            auctions[_auctionId].auctionEndTime < block.timestamp,
+            block.timestamp >= auctions[_auctionId].auctionEndTime,
             "Auction has not ended yet."
         );
 
@@ -123,6 +124,14 @@ contract Auction is Ownable {
             itemIds[i] = itemList[i].itemId;
         }
         return (itemIds, highestBidders);
+    }
+
+    modifier nonOwner() {
+        require(
+            msg.sender != owner(),
+            "Owner cannot bid on their own auction."
+        );
+        _;
     }
 
     /************
