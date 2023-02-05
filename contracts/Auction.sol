@@ -23,7 +23,7 @@ contract Auction is Ownable {
 
     mapping(uint => Auctions) public auctions;
 
-    uint auctionId = 0;
+    uint auctionId;
 
     /*************EVENTS**************/
     // @todo should be indexed for better filtering in the frontend
