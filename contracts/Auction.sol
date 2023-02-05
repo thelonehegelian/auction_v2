@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
-// import "hardhat/console.sol";
+import "hardhat/console.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract Auction is Ownable {
@@ -53,7 +53,7 @@ contract Auction is Ownable {
         Item[] memory items,
         string memory auctionName
     ) public onlyOwner {
-        Auctions memory newAuction = auctions[auctionId];
+        Auctions storage newAuction = auctions[auctionId];
         // @note can't do this: newAuction.items = items, because not allowed to map memory to storage directly
         _createItemList(items);
         newAuction.auctionId = auctionId;
@@ -61,45 +61,41 @@ contract Auction is Ownable {
         /**  
          block.timestamp is not always suited, as it can be manipulated by miners but only a few seconds
          https://stackoverflow.com/questions/71000103/solidity-block-timestamp-vulnerability
+         https://consensys.github.io/smart-contract-best-practices/development-recommendations/solidity-specific/timestamp-dependence/
          this might be a better solution but never tried it:
          https://docs.chain.link/chainlink-automation/introduction/#time-based-trigger
          */
-        newAuction.auctionEndTime = block.timestamp + 1 days;
+        newAuction.auctionEndTime = block.timestamp + 10 days;
         newAuction.isEnded = false;
+        auctionId++;
     }
 
     // *this function adds balance to the contract
     function placeBid(uint _auctionId, uint _itemId) public payable nonOwner {
+        require(
+            msg.value > auctions[_auctionId].items[_itemId].startingPrice,
+            "Bid amount is less than the starting price."
+        );
         // if the auction time has ended then find the highest bidder and emit the event AuctionEnded
         if (block.timestamp >= auctions[_auctionId].auctionEndTime) {
             payable(msg.sender).transfer(msg.value);
-            // @note I would like to call a private _auctionEnded function here
+            // @note a private _endAuction function can be used take care of the settlement here
             emit AuctionEnded(_auctionId, auctions[_auctionId].auctionName);
+            // @note isn't return implicit?
             return;
         }
 
-        require(
-            msg.value >= auctions[_auctionId].items[_itemId].startingPrice,
-            "Bid amount is less than the starting price."
-        ); // @todo use custom error to save gas
-
-        require(
-            msg.value > auctions[_auctionId].items[_itemId].highestBid,
-            "Bid amount is less than the highest bid."
-        ); // @todo use custom error to save gas
-
-        // if the above conditions are met then we want to transfer the previous highest bidder their money
         address prevHighestBidder = auctions[_auctionId]
             .items[_itemId]
             .highestBidder;
-        uint256 prevHighestBid = auctions[auctionId].items[_itemId].highestBid;
 
-        // we update the highest bid and highest bidder
-        auctions[auctionId].items[_itemId].highestBid = msg.value;
-        auctions[auctionId].items[_itemId].highestBidder = payable(msg.sender);
-        // we refund the previous highest bidder their money, as they have been outbid
+        uint prevHighestBid = auctions[_auctionId].items[_itemId].highestBid;
+
+        // update the highest bid and highest bidder
+        auctions[_auctionId].items[_itemId].highestBid = msg.value;
+        auctions[_auctionId].items[_itemId].highestBidder = msg.sender;
         _transferToPrevBidder(payable(prevHighestBidder), prevHighestBid);
-        emit BidPlaced(auctionId, msg.value, msg.sender);
+        // emit BidPlaced(auctionId, msg.value, msg.sender);
     }
 
     // Finds the highest bidder for each item in the auction and returns an array of addresses
@@ -139,6 +135,23 @@ contract Auction is Ownable {
         _;
     }
 
+    // @todo can I combine these two modifiers into one?
+    modifier bidAmountGreaterThanStartingPrice(uint _auctionId, uint _itemId) {
+        require(
+            msg.value > auctions[_auctionId].items[_itemId].startingPrice,
+            "Bid amount is less than the starting price."
+        );
+        _;
+    }
+
+    modifier bidAmountGreaterThanHighestBid(uint _auctionId, uint _itemId) {
+        require(
+            msg.value > auctions[_auctionId].items[_itemId].highestBid,
+            "Bid amount is less than the highest bid."
+        );
+        _;
+    }
+
     /************
      * HELPERS *
      ************/
@@ -152,6 +165,7 @@ contract Auction is Ownable {
 
     function _createItemList(Item[] memory _itemsList) private {
         for (uint i = 0; i < _itemsList.length; i++) {
+            console.log(_itemsList[i].itemName);
             auctions[auctionId].items.push(_itemsList[i]);
         }
     }
