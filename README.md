@@ -55,6 +55,7 @@
 - Custom error messages are usually cheaper than require strings
 - Possible to make `public` functions `external` to save gas
 - Use of  unchecked { i += 1; } in for loop. There is no real risk of overflow in this case
+- Enabled compiler optimizer in hardhat.config.js. It usually saves a lot of gas
 
 # Things would have like to try
 - Would have liked to add a Factory contract. Usually such contracts come with Factory contracts to allow various users to create different contracts of the same type. The basic Factory contract is there in the contracts folder but I did not implement
