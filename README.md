@@ -7,23 +7,18 @@
 
 - Allows a user to create an auction with a list of items
 - Allows other users to bid on items in the auction
-- There is a time limit for the auction, 
-  - [ ] which is fixed for now but perhaps should be set at `createBid`
+- There is a time limit for the auction, which is fixed for now but perhaps should be set at `createBid`
 - Once the auction has ended no more bids are taken
-- 
-
-### Objects
-- AuctionDetails
-  - Why `auctionId` and `auctionName`? I had planned to add a Factory contract to make it more interesting
-- Item
+- `findHighestBidder` is used to find the highest bid nothin else is done at the end of the auction
 
 ### Functions
 - `createAuction` -> Allows the owner to create an auction with a list of items
 - `placeBid` -> Allows users to place bids on the items
   - each higher bid removes the highest bidder from the Item struct and returns their money
-  - [ ] other possible solutions to this?
-- `transferToPrevBidder` -> A helper function to transfer to losing bidder
-- `findHighestBidder` -> A helper function to find the highest bidder for each item
+- `findHighestBidder` -> Finds the highest bidder for each item
+- `_transferToPrevBidder` -> A private helper function to transfer to losing bidder
+- `_createItemList` -> A private helper function to create an array of items
+- Test helper functions, please see comment in the contract file
 ### Events
 - Events can be useful for Frontend, and an Auction contract is likely to be a Frontend application 
 - `AuctionCreated`
@@ -51,12 +46,18 @@
 3. Auction is created successfully
 4. Owner of the contract (creator of auction) is not allowed to place a bid
 5. Bids less than the previous high bid or less than starting price are not allowed
-6. New high bid is updated as well as the highest bidder
+6. New high bid is updated as well as the highest bidder, and the eth is refunded to the losing bidder
 7. Does not allow bids after auction time is up
 8. Does not allow settlement if the auction has not ended. Does not allow non-owners to call `findHighestBidder`
+9. Finds the highest bidders and returns the address and itemId
+
+# Gas optimization
+- Custom error messages are usually cheaper than require strings
+- Possible to make `public` functions `external` to save gas
+- Use of  unchecked { i += 1; } in for loop. There is no real risk of overflow in this case
 
 # Things would have like to try
-- I would have liked to add a Factory contract. Usually such contracts come with Factory contracts to allow various users to create different contracts of the same type. The basic Factory contract is there in the contracts folder but I did not implement
+- Would have liked to add a Factory contract. Usually such contracts come with Factory contracts to allow various users to create different contracts of the same type. The basic Factory contract is there in the contracts folder but I did not implement
 - ERC20 support 
 - Liked to have used an Oracle to set prices in USD or even a sort of NFT barter system
 - Would be nice to use NFT representation for each item 
