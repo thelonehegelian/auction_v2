@@ -5,8 +5,9 @@ import { Auction } from '../typechain-types/contracts/Auction';
 import { BigNumber } from 'ethers';
 
 // @note currently only concerned with a single auction
+// @note assuming that the creator of the auction won't be malicious
+//  and assign highestBidder to its own address, the contract is limited against that anyway
 const auctionName = 'Southebys Auction';
-// sample items for testing
 const items = [
   {
     itemId: BigNumber.from(0),

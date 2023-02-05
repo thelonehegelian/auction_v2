@@ -68,7 +68,7 @@ contract Auction is Ownable, ReentrancyGuard {
     /// @param _itemId - id of the item
     /// @notice - this function adds balance to the contract
     // don't think reentrancy attack is possible here but to be sure we use the nonReentrant modifier
-    // see comments in the _transferToPrevBidder function
+    // also see comment in the _transferToPrevBidder function
     function placeBid(
         uint _auctionId,
         uint _itemId
