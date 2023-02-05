@@ -128,23 +128,6 @@ contract Auction is Ownable {
         _;
     }
 
-    // @todo can I combine these two modifiers into one?
-    modifier bidAmountGreaterThanStartingPrice(uint _auctionId, uint _itemId) {
-        require(
-            msg.value > auctions[_auctionId].items[_itemId].startingPrice,
-            "Bid amount is less than the starting price."
-        );
-        _;
-    }
-
-    modifier bidAmountGreaterThanHighestBid(uint _auctionId, uint _itemId) {
-        require(
-            msg.value > auctions[_auctionId].items[_itemId].highestBid,
-            "Bid amount is less than the highest bid."
-        );
-        _;
-    }
-
     modifier bidMustBeValid(uint _auctionId, uint _itemId) {
         require(
             msg.value > auctions[_auctionId].items[_itemId].startingPrice &&
