@@ -1,6 +1,6 @@
 # Auction Contract
 
-# Note to the assessor 
+**Note to the assessor** 
 - the code is over-commented, but that is just for the assignment, please excuse that
 
 ## Description and Logic
