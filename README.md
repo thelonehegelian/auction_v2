@@ -1,6 +1,6 @@
 # Auction Contract
 
-# Note to the assessor 
+**Note to the assessor** 
 - the code is over-commented, but that is just for the assignment, please excuse that
 
 ## Description and Logic
@@ -11,6 +11,7 @@
 - Once the auction has ended no more bids are taken
 - `findHighestBidder` is used to find the highest bid nothin else is done at the end of the auction
 - Using `Ownable` from OpenZeppelin, it allows for transferring ownership
+- Apart from some basic restrictions and checks, for the purpose of the assignment, I am assuming that the creator of the auction would not act maliciously (though obviously they can). I have commented where I think it might be possible
 
 ### Functions
 - `createAuction` -> Allows the owner to create an auction with a list of items
