@@ -3,7 +3,6 @@ pragma solidity ^0.8.9;
 
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-// import reentrancy from openzeppelin
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 contract Auction is Ownable, ReentrancyGuard {
@@ -73,7 +72,7 @@ contract Auction is Ownable, ReentrancyGuard {
         uint _auctionId,
         uint _itemId
     ) public payable nonOwner nonReentrant bidMustBeValid(_auctionId, _itemId) {
-        // if the auction time has ended then find the highest bidder and emit the event AuctionEnded
+        // if the auction time has ended
         if (block.timestamp >= auctions[_auctionId].auctionEndTime) {
             // @note a private _endAuction function can be used take care of the settlement here
             emit AuctionEnded(_auctionId, auctions[_auctionId].auctionName);
@@ -152,6 +151,7 @@ contract Auction is Ownable, ReentrancyGuard {
         _prevBidder.transfer(prevHighestBid);
     }
 
+    /// @param _itemsList - array of items to be auctioned
     function _createItemList(Item[] memory _itemsList) private {
         for (uint i = 0; i < _itemsList.length; ) {
             auctions[auctionId].items.push(_itemsList[i]);
