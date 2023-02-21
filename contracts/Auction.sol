@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.9;
+pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -47,7 +47,6 @@ contract Auction is Ownable, ReentrancyGuard {
         string memory auctionName
     ) public onlyOwner {
         Auctions storage newAuction = auctions[auctionId];
-        // @note can't do this: newAuction.items = items, because not allowed to map memory to storage directly
         _createItemList(items);
         newAuction.auctionId = auctionId;
         newAuction.auctionName = auctionName;
@@ -67,7 +66,6 @@ contract Auction is Ownable, ReentrancyGuard {
     /// @param _itemId - id of the item
     /// @notice - this function adds balance to the contract
     // don't think reentrancy attack is possible here but to be sure we use the nonReentrant modifier
-    // also see comment in the _transferToPrevBidder function
     function placeBid(
         uint _auctionId,
         uint _itemId

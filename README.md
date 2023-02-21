@@ -1,7 +1,6 @@
 # Auction Contract
 ## Description and Logic
-
-- Allows a user to create an auction with a list of items
+- A basic auction contract that allows a user to create an auction with a list of items
 - Allows other users to bid on items in the auction
 - There is a time limit for the auction, which is fixed for now but perhaps should be set at `createBid`
 - Once the auction has ended no more bids are taken
